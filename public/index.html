@@ -1,101 +1,122 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Painel IE</title>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Painel IE</title>
 
-    <style>
-      body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background: #f1f5f9;
-      }
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
 
-      .sidebar {
-        width: 220px;
-        height: 100vh;
-        background: #1e3a8a;
-        color: white;
-        padding: 20px;
-        position: fixed;
-      }
+body {
+    background: linear-gradient(135deg, #14001f, #0b0014);
+    color: white;
+    display: flex;
+}
 
-      .sidebar img {
-        width: 120px;
-        margin-bottom: 20px;
-      }
+.sidebar {
+    width: 240px;
+    background: linear-gradient(180deg, #ff2aad, #ff7a00);
+    height: 100vh;
+    padding: 30px 20px;
+}
 
-      .content {
-        margin-left: 240px;
-        padding: 30px;
-      }
+.sidebar h2 {
+    margin-bottom: 40px;
+}
 
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 12px;
-        margin-top: 20px;
-      }
+.sidebar a {
+    display: block;
+    color: white;
+    text-decoration: none;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
 
-      .card {
-        background: white;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      }
+.main {
+    flex: 1;
+    padding: 40px;
+}
 
-      .card strong {
-        font-size: 20px;
-        display: block;
-        margin-top: 5px;
-      }
-    </style>
-  </head>
+h1 {
+    margin-bottom: 30px;
+    font-size: 32px;
+}
 
-  <body>
-    <div class="sidebar">
-      <img src="/logo.png" />
-      <p>Visão Geral</p>
-      <p>Tickets</p>
-      <p>Satisfação</p>
-      <p>Tags</p>
-      <p>Individual</p>
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background: rgba(255,255,255,0.05);
+    border-radius: 16px;
+    padding: 25px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 42, 173, 0.3);
+    box-shadow: 0 0 20px rgba(255, 42, 173, 0.25);
+}
+
+.card strong {
+    font-size: 26px;
+    display: block;
+    margin-top: 10px;
+    color: #ff7a00;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+    <h2>Painel IE</h2>
+    <a href="#">Visão Geral</a>
+    <a href="#">Tickets</a>
+    <a href="#">Satisfação</a>
+    <a href="#">Tags</a>
+    <a href="#">Individual</a>
+</div>
+
+<div class="main">
+    <h1>Visão Geral</h1>
+
+    <div class="cards">
+        <div class="card">
+            Total de Tickets
+            <strong>1250</strong>
+        </div>
+
+        <div class="card">
+            Tickets Resolvidos
+            <strong>1080</strong>
+        </div>
+
+        <div class="card">
+            Taxa de Resolução
+            <strong>86.4%</strong>
+        </div>
+
+        <div class="card">
+            Tickets Pendentes
+            <strong>120</strong>
+        </div>
+
+        <div class="card">
+            Tickets Cancelados
+            <strong>50</strong>
+        </div>
+
+        <div class="card">
+            Média de Satisfação
+            <strong>4.7</strong>
+        </div>
     </div>
+</div>
 
-    <div class="content">
-      <h1>Visão Geral</h1>
-
-      <div class="grid">
-        <div class="card">
-          Total de Tickets
-          <strong>1250</strong>
-        </div>
-
-        <div class="card">
-          Tickets Resolvidos
-          <strong>1080</strong>
-        </div>
-
-        <div class="card">
-          Taxa de Resolução
-          <strong>86.4%</strong>
-        </div>
-
-        <div class="card">
-          Tickets Pendentes
-          <strong>120</strong>
-        </div>
-
-        <div class="card">
-          Tickets Cancelados
-          <strong>50</strong>
-        </div>
-
-        <div class="card">
-          Média de Satisfação
-          <strong>4.7</strong>
-        </div>
-      </div>
-    </div>
-  </body>
+</body>
 </html>
