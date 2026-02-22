@@ -1,122 +1,66 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html>
 <head>
-<meta charset="UTF-8">
 <title>Painel IE</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
-}
-
 body {
-    background: linear-gradient(135deg, #14001f, #0b0014);
-    color: white;
-    display: flex;
+    margin:0;
+    font-family: Arial;
+    background: linear-gradient(135deg,#14001f,#0b0014);
+    color:white;
 }
 
-.sidebar {
-    width: 240px;
-    background: linear-gradient(180deg, #ff2aad, #ff7a00);
-    height: 100vh;
-    padding: 30px 20px;
-}
-
-.sidebar h2 {
-    margin-bottom: 40px;
-}
-
-.sidebar a {
-    display: block;
-    color: white;
-    text-decoration: none;
-    margin-bottom: 20px;
-    font-weight: bold;
-}
-
-.main {
-    flex: 1;
-    padding: 40px;
-}
-
-h1 {
-    margin-bottom: 30px;
-    font-size: 32px;
-}
+.container { padding:40px; }
 
 .cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
+    display:grid;
+    grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
 }
 
 .card {
     background: rgba(255,255,255,0.05);
-    border-radius: 16px;
-    padding: 25px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 42, 173, 0.3);
-    box-shadow: 0 0 20px rgba(255, 42, 173, 0.25);
+    padding:25px;
+    border-radius:16px;
+    border:1px solid #ff2aad;
+    box-shadow:0 0 20px rgba(255,42,173,0.3);
 }
 
 .card strong {
-    font-size: 26px;
-    display: block;
-    margin-top: 10px;
-    color: #ff7a00;
+    font-size:26px;
+    color:#ff7a00;
+}
+
+button {
+    margin-top:20px;
+    background: linear-gradient(90deg,#ff2aad,#ff7a00);
+    border:none;
+    padding:12px 20px;
+    border-radius:10px;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
 }
 </style>
 </head>
 
 <body>
 
-<div class="sidebar">
-    <h2>Painel IE</h2>
-    <a href="#">Visão Geral</a>
-    <a href="#">Tickets</a>
-    <a href="#">Satisfação</a>
-    <a href="#">Tags</a>
-    <a href="#">Individual</a>
+<div class="container">
+
+<h1>Visão Geral</h1>
+
+<input type="file" id="file">
+<button onclick="upload()">Upload Excel</button>
+
+<div class="cards" id="cards"></div>
+
+<canvas id="grafico" height="100"></canvas>
+
 </div>
 
-<div class="main">
-    <h1>Visão Geral</h1>
-
-    <div class="cards">
-        <div class="card">
-            Total de Tickets
-            <strong>1250</strong>
-        </div>
-
-        <div class="card">
-            Tickets Resolvidos
-            <strong>1080</strong>
-        </div>
-
-        <div class="card">
-            Taxa de Resolução
-            <strong>86.4%</strong>
-        </div>
-
-        <div class="card">
-            Tickets Pendentes
-            <strong>120</strong>
-        </div>
-
-        <div class="card">
-            Tickets Cancelados
-            <strong>50</strong>
-        </div>
-
-        <div class="card">
-            Média de Satisfação
-            <strong>4.7</strong>
-        </div>
-    </div>
-</div>
-
+<script src="app.js"></script>
 </body>
 </html>
