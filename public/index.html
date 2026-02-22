@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Painel IE</title>
+
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f1f5f9;
+      }
+
+      .sidebar {
+        width: 220px;
+        height: 100vh;
+        background: #1e3a8a;
+        color: white;
+        padding: 20px;
+        position: fixed;
+      }
+
+      .sidebar img {
+        width: 120px;
+        margin-bottom: 20px;
+      }
+
+      .content {
+        margin-left: 240px;
+        padding: 30px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-top: 20px;
+      }
+
+      .card {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+
+      .card strong {
+        font-size: 20px;
+        display: block;
+        margin-top: 5px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="sidebar">
+      <img src="/logo.png" />
+      <p>Visão Geral</p>
+      <p>Tickets</p>
+      <p>Satisfação</p>
+      <p>Tags</p>
+      <p>Individual</p>
+    </div>
+
+    <div class="content">
+      <h1>Visão Geral</h1>
+
+      <div class="grid">
+        <div class="card">
+          Total de Tickets
+          <strong>1250</strong>
+        </div>
+
+        <div class="card">
+          Tickets Resolvidos
+          <strong>1080</strong>
+        </div>
+
+        <div class="card">
+          Taxa de Resolução
+          <strong>86.4%</strong>
+        </div>
+
+        <div class="card">
+          Tickets Pendentes
+          <strong>120</strong>
+        </div>
+
+        <div class="card">
+          Tickets Cancelados
+          <strong>50</strong>
+        </div>
+
+        <div class="card">
+          Média de Satisfação
+          <strong>4.7</strong>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
