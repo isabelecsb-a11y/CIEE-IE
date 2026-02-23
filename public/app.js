@@ -7,10 +7,6 @@ function toggleTheme() {
     document.body.classList.toggle("dark");
 }
 
-/* =========================
-   FILTROS
-   ========================= */
-
 function popularFiltros() {
     const meses = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
 
@@ -23,14 +19,6 @@ function popularFiltros() {
         anos.map(a=>`<option value="${a}">${a}</option>`).join("");
 }
 
-function aplicarFiltro() {
-    carregar();
-}
-
-/* =========================
-   KPIs
-   ========================= */
-
 async function carregar() {
     const mes = document.getElementById("mes").value;
     const ano = document.getElementById("ano").value;
@@ -40,52 +28,19 @@ async function carregar() {
 
     if (!d) {
         document.getElementById("conteudo").innerHTML = "Sem dados";
-        if (grafico) grafico.destroy();
         return;
     }
 
-    const anterior = await fetch(`/dados?mes=${mes-1}&ano=${ano}`);
-    const prev = await anterior.json();
-
-    const delta = prev ? calcularDelta(d.total, prev.total) : null;
-
     document.getElementById("conteudo").innerHTML = `
         <div class="cards">
-            <div class="card">
-                Total Tickets
-                <strong>${d.total}</strong>
-                ${deltaHTML(delta)}
-            </div>
-            <div class="card">
-                Resolvidos
-                <strong>${d.resolvidos}</strong>
-            </div>
-            <div class="card">
-                Satisfação
-                <strong>${d.satisfacao}</strong>
-            </div>
+            <div class="card">Total <strong>${d.total}</strong></div>
+            <div class="card">Resolvidos <strong>${d.resolvidos}</strong></div>
+            <div class="card">Satisfação <strong>${d.satisfacao}</strong></div>
         </div>
     `;
 
     carregarGrafico();
 }
-
-function calcularDelta(atual, anterior) {
-    const diff = ((atual - anterior) / anterior * 100).toFixed(1);
-    return diff;
-}
-
-function deltaHTML(delta) {
-    if (!delta) return "";
-
-    return `
-        <div class="delta ${delta >= 0 ? "up" : "down"}">
-            ${delta >= 0 ? "↑" : "↓"} ${Math.abs(delta)}%
-        </div>
-    `;
-}
-
-/* ========================= */
 
 async function carregarGrafico() {
     const res = await fetch("/mensal");
@@ -103,4 +58,18 @@ async function carregarGrafico() {
             datasets:[{ label:"Resolvidos", data: totais }]
         }
     });
+}
+
+async function upload() {
+    const file = document.getElementById("file").files[0];
+
+    const fd = new FormData();
+    fd.append("file", file);
+
+    await fetch("/upload", {
+        method: "POST",
+        body: fd
+    });
+
+    location.reload();
 }
