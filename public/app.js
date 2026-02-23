@@ -1,3 +1,5 @@
+let grafico;
+
 async function carregar() {
     const res = await fetch("/dados");
     const d = await res.json();
@@ -22,13 +24,32 @@ async function carregar() {
         </div>
     `;
 
-    new Chart(document.getElementById("grafico"), {
-        type: "bar",
+    carregarGrafico();
+}
+
+async function carregarGrafico() {
+    const res = await fetch("/historico");
+    const dados = await res.json();
+
+    const labels = dados.map(d => 
+        new Date(d.data).toLocaleDateString()
+    );
+
+    const resolvidos = dados.map(d => d.resolvidos);
+    const pendentes = dados.map(d => d.pendentes);
+    const cancelados = dados.map(d => d.cancelados);
+
+    if (grafico) grafico.destroy();
+
+    grafico = new Chart(document.getElementById("grafico"), {
+        type: "line",
         data: {
-            labels:["Resolvidos","Pendentes","Cancelados"],
-            datasets:[{
-                data:[d.resolvidos,d.pendentes,d.cancelados]
-            }]
+            labels,
+            datasets: [
+                { label: "Resolvidos", data: resolvidos },
+                { label: "Pendentes", data: pendentes },
+                { label: "Cancelados", data: cancelados }
+            ]
         }
     });
 }
