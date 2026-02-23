@@ -1,63 +1,103 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Painel IE</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>Painel IE</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<style>
-body {
-    margin:0;
-    font-family: Arial;
-    background: linear-gradient(135deg,#14001f,#0b0014);
-    color:white;
-}
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      color: #1e293b;
+    }
 
-.container { padding:40px; }
+    .container {
+      padding: 50px;
+      max-width: 1200px;
+      margin: auto;
+    }
 
-.cards {
-    display:grid;
-    grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
-    gap:20px;
-}
+    h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
 
-.card {
-    background: rgba(255,255,255,0.05);
-    padding:25px;
-    border-radius:16px;
-    border:1px solid #ff2aad;
-    box-shadow:0 0 20px rgba(255,42,173,0.3);
-}
+    .subtitle {
+      color: #64748b;
+      margin-bottom: 40px;
+    }
 
-.card strong {
-    font-size:26px;
-    color:#ff7a00;
-}
+    .upload-box {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      margin-bottom: 30px;
+    }
 
-button {
-    margin-top:20px;
-    background: linear-gradient(90deg,#ff2aad,#ff7a00);
-    border:none;
-    padding:12px 20px;
-    border-radius:10px;
-    color:white;
-    font-weight:bold;
-    cursor:pointer;
-}
-</style>
+    button {
+      background: #1e3a8a;
+      color: white;
+      border: none;
+      padding: 12px 22px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      margin-top: 30px;
+    }
+
+    .card {
+      background: white;
+      padding: 22px;
+      border-radius: 14px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+    }
+
+    .card span {
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    .card strong {
+      display: block;
+      font-size: 24px;
+      margin-top: 6px;
+      color: #1e3a8a;
+    }
+
+    .empty-state {
+      background: white;
+      padding: 40px;
+      border-radius: 16px;
+      text-align: center;
+      color: #64748b;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+    }
+  </style>
 </head>
 
 <body>
 
 <div class="container">
 
-<h1>Visão Geral</h1>
+  <h1>Painel de Indicadores IE</h1>
+  <div class="subtitle">Dashboard de acompanhamento operacional</div>
 
-<input type="file" id="file">
-<button onclick="upload()">Upload Excel</button>
+  <div class="upload-box">
+    <input type="file" id="file">
+    <button onclick="upload()">Enviar Relatório</button>
+  </div>
 
-<div class="cards" id="cards"></div>
+  <div id="conteudo"></div>
 
-<canvas id="grafico" height="100"></canvas>
+  <canvas id="grafico" height="100"></canvas>
 
 </div>
 
