@@ -42,16 +42,19 @@ app.post("/upload", upload.single("file"), async (req, res) => {
     const row = data[0];
 
     await pool.query(`
-      INSERT INTO indicadores 
-      (total_tickets, resolvidos, pendentes, cancelados, satisfacao)
-      VALUES ($1,$2,$3,$4,$5)
-    `, [
-      row.total,
-      row.resolvidos,
-      row.pendentes,
-      row.cancelados,
-      row.satisfacao
-    ]);
+  INSERT INTO indicadores 
+  (total_tickets, resolvidos, pendentes, cancelados, satisfacao, responsavel, mes, ano)
+  VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+`, [
+  row.total,
+  row.resolvidos,
+  row.pendentes,
+  row.cancelados,
+  row.satisfacao,
+  row.responsavel,
+  row.mes,
+  row.ano
+]);
 
     res.json({ ok: true });
 
