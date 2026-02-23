@@ -1,155 +1,106 @@
 let grafico;
-let abaAtual = "geral";
 
-function trocarAba(aba) {
-    abaAtual = aba;
+popularFiltros();
+carregar();
 
-    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-    event.target.classList.add("active");
+function toggleTheme() {
+    document.body.classList.toggle("dark");
+}
 
+/* =========================
+   FILTROS
+   ========================= */
+
+function popularFiltros() {
+    const meses = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+
+    document.getElementById("mes").innerHTML =
+        meses.map((m,i)=>`<option value="${i+1}">${m}</option>`).join("");
+
+    const anos = [2024,2025,2026,2027];
+
+    document.getElementById("ano").innerHTML =
+        anos.map(a=>`<option value="${a}">${a}</option>`).join("");
+}
+
+function aplicarFiltro() {
     carregar();
 }
 
-async function carregar() {
-    if (abaAtual === "geral") carregarGeral();
-    if (abaAtual === "mensal") carregarMensal();
-    if (abaAtual === "anual") carregarAnual();
-    if (abaAtual === "ranking") carregarRanking();
-}
-
 /* =========================
-   VISÃO GERAL
+   KPIs
    ========================= */
 
-async function carregarGeral() {
-    const res = await fetch("/dados");
+async function carregar() {
+    const mes = document.getElementById("mes").value;
+    const ano = document.getElementById("ano").value;
+
+    const res = await fetch(`/dados?mes=${mes}&ano=${ano}`);
     const d = await res.json();
 
-    if (!d) return estadoVazio();
+    if (!d) {
+        document.getElementById("conteudo").innerHTML = "Sem dados";
+        if (grafico) grafico.destroy();
+        return;
+    }
+
+    const anterior = await fetch(`/dados?mes=${mes-1}&ano=${ano}`);
+    const prev = await anterior.json();
+
+    const delta = prev ? calcularDelta(d.total, prev.total) : null;
 
     document.getElementById("conteudo").innerHTML = `
         <div class="cards">
-            <div class="card"><span>Total</span><strong>${d.total || "-"}</strong></div>
-            <div class="card"><span>Resolvidos</span><strong>${d.resolvidos || "-"}</strong></div>
-            <div class="card"><span>Pendentes</span><strong>${d.pendentes || "-"}</strong></div>
-            <div class="card"><span>Cancelados</span><strong>${d.cancelados || "-"}</strong></div>
-            <div class="card"><span>Satisfação</span><strong>${d.satisfacao || "-"}</strong></div>
+            <div class="card">
+                Total Tickets
+                <strong>${d.total}</strong>
+                ${deltaHTML(delta)}
+            </div>
+            <div class="card">
+                Resolvidos
+                <strong>${d.resolvidos}</strong>
+            </div>
+            <div class="card">
+                Satisfação
+                <strong>${d.satisfacao}</strong>
+            </div>
         </div>
     `;
 
-    carregarGraficoLinha();
+    carregarGrafico();
 }
 
-/* =========================
-   MENSAL
-   ========================= */
-
-async function carregarMensal() {
-    const res = await fetch("/mensal");
-    const dados = await res.json();
-
-    if (!dados.length) return estadoVazio();
-
-    document.getElementById("conteudo").innerHTML = `<h3>Comparativo Mensal</h3>`;
-
-    const labels = dados.map(d => "Mês " + d.mes);
-    const resolvidos = dados.map(d => d.resolvidos);
-
-    renderizarGrafico("bar", labels, resolvidos, "Resolvidos");
+function calcularDelta(atual, anterior) {
+    const diff = ((atual - anterior) / anterior * 100).toFixed(1);
+    return diff;
 }
 
-/* =========================
-   ANUAL
-   ========================= */
+function deltaHTML(delta) {
+    if (!delta) return "";
 
-async function carregarAnual() {
-    const res = await fetch("/anual");
-    const dados = await res.json();
-
-    if (!dados.length) return estadoVazio();
-
-    document.getElementById("conteudo").innerHTML = `<h3>Visão Anual</h3>`;
-
-    const labels = dados.map(d => d.ano);
-    const totais = dados.map(d => d.total);
-
-    renderizarGrafico("line", labels, totais, "Total Tickets");
-}
-
-/* =========================
-   RANKING
-   ========================= */
-
-async function carregarRanking() {
-    const res = await fetch("/ranking");
-    const dados = await res.json();
-
-    if (!dados.length) return estadoVazio();
-
-    document.getElementById("conteudo").innerHTML = `
-        <h3>Ranking Individual</h3>
-        <div class="cards">
-            ${dados.map(r => `
-                <div class="card">
-                    <span>${r.responsavel}</span>
-                    <strong>${r.resolvidos}</strong>
-                </div>
-            `).join("")}
+    return `
+        <div class="delta ${delta >= 0 ? "up" : "down"}">
+            ${delta >= 0 ? "↑" : "↓"} ${Math.abs(delta)}%
         </div>
     `;
-
-    if (grafico) grafico.destroy();
 }
 
 /* ========================= */
 
-async function carregarGraficoLinha() {
-    const res = await fetch("/historico");
+async function carregarGrafico() {
+    const res = await fetch("/mensal");
     const dados = await res.json();
 
-    const labels = dados.map(d => new Date(d.data).toLocaleDateString());
-    const totais = dados.map(d => d.total);
+    const labels = dados.map(d => "Mês " + d.mes);
+    const totais = dados.map(d => d.resolvidos);
 
-    renderizarGrafico("line", labels, totais, "Evolução");
-}
-
-function renderizarGrafico(tipo, labels, data, label) {
     if (grafico) grafico.destroy();
 
     grafico = new Chart(document.getElementById("grafico"), {
-        type: tipo,
+        type: "line",
         data: {
             labels,
-            datasets: [{
-                label,
-                data
-            }]
+            datasets:[{ label:"Resolvidos", data: totais }]
         }
     });
 }
-
-function estadoVazio() {
-    document.getElementById("conteudo").innerHTML = `
-        <div class="empty-state">
-            Sem dados disponíveis
-        </div>
-    `;
-    if (grafico) grafico.destroy();
-}
-
-async function upload() {
-    const file = document.getElementById("file").files[0];
-    if (!file) return alert("Selecione um arquivo");
-
-    const fd = new FormData();
-    fd.append("file", file);
-
-    await fetch("/upload", {
-        method: "POST",
-        body: fd
-    });
-
-    location.reload();
-}
-
-carregar();
