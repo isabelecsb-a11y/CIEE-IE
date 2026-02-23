@@ -24,6 +24,9 @@ CREATE TABLE IF NOT EXISTS indicadores (
   pendentes INT,
   cancelados INT,
   satisfacao FLOAT,
+  responsavel TEXT,
+  mes INT,
+  ano INT,
   data TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )
 `);
