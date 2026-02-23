@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -70,13 +71,6 @@ button {
     background: var(--card);
     padding: 22px;
     border-radius: 16px;
-    transition: 0.3s;
-    position: relative;
-}
-
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(255,42,173,0.25);
 }
 
 .delta {
@@ -108,8 +102,12 @@ canvas {
 <div class="filters">
     <select id="mes"></select>
     <select id="ano"></select>
-    <button onclick="aplicarFiltro()">Aplicar</button>
+    <button onclick="carregar()">Aplicar</button>
 </div>
+
+<input type="file" id="file">
+<button onclick="upload()">Upload</button>
+<button onclick="window.open('/pdf')">Exportar PDF</button>
 
 <div id="conteudo"></div>
 
