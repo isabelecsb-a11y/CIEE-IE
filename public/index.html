@@ -13,56 +13,66 @@
     }
 
     .container {
-      padding: 50px;
-      max-width: 1200px;
+      padding: 40px;
+      max-width: 1400px;
       margin: auto;
     }
 
     h1 {
-      font-size: 32px;
-      margin-bottom: 10px;
+      font-size: 28px;
+      margin-bottom: 25px;
     }
 
-    .subtitle {
-      color: #64748b;
-      margin-bottom: 40px;
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+
+    .tab {
+      padding: 10px 18px;
+      background: white;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      transition: 0.3s;
+    }
+
+    .tab.active {
+      background: #1e3a8a;
+      color: white;
     }
 
     .upload-box {
       background: white;
-      padding: 30px;
+      padding: 25px;
       border-radius: 16px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-      margin-bottom: 30px;
-    }
-
-    button {
-      background: #1e3a8a;
-      color: white;
-      border: none;
-      padding: 12px 22px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: bold;
+      margin-bottom: 25px;
     }
 
     .cards {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 18px;
-      margin-top: 30px;
+      margin-top: 20px;
     }
 
     .card {
       background: white;
-      padding: 22px;
+      padding: 20px;
       border-radius: 14px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+      transition: 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
     }
 
     .card span {
-      color: #64748b;
       font-size: 13px;
+      color: #64748b;
     }
 
     .card strong {
@@ -72,13 +82,12 @@
       color: #1e3a8a;
     }
 
-    .empty-state {
+    canvas {
+      margin-top: 30px;
       background: white;
-      padding: 40px;
+      padding: 20px;
       border-radius: 16px;
-      text-align: center;
-      color: #64748b;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
     }
   </style>
 </head>
@@ -88,7 +97,14 @@
 <div class="container">
 
   <h1>Painel de Indicadores IE</h1>
-  <div class="subtitle">Dashboard de acompanhamento operacional</div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="trocarAba('geral')">Visão Geral</div>
+    <div class="tab" onclick="trocarAba('mensal')">Mensal</div>
+    <div class="tab" onclick="trocarAba('anual')">Anual</div>
+    <div class="tab" onclick="trocarAba('satisfacao')">Satisfação</div>
+    <div class="tab" onclick="trocarAba('individual')">Individual</div>
+  </div>
 
   <div class="upload-box">
     <input type="file" id="file">
