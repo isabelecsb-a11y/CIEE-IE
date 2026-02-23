@@ -18,89 +18,70 @@ app.use(express.json());
 pool.query(`
 CREATE TABLE IF NOT EXISTS indicadores (
   id SERIAL PRIMARY KEY,
-  tipo TEXT,
   total INT,
   resolvidos INT,
   pendentes INT,
   cancelados INT,
   satisfacao FLOAT,
-  responsavel TEXT,
   mes INT,
   ano INT,
   data TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )
 `);
 
-function procurar(sheet, texto) {
-    const range = XLSX.utils.decode_range(sheet['!ref']);
-
-    for (let R = range.s.r; R <= range.e.r; ++R) {
-        for (let C = range.s.c; C <= range.e.c; ++C) {
-
-            const cell = sheet[XLSX.utils.encode_cell({ r: R, c: C })];
-            if (!cell) continue;
-
-            if (String(cell.v).includes(texto)) {
-                const valor = sheet[XLSX.utils.encode_cell({ r: R, c: C + 1 })];
-                if (valor) return valor.v;
-            }
-        }
-    }
-    return null;
-}
-
 app.post("/upload", upload.single("file"), async (req, res) => {
   try {
     const workbook = XLSX.readFile(req.file.path);
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const data = XLSX.utils.sheet_to_json(sheet);
 
-    let tipo = "mensal";
-
-    if (procurar(sheet, "Relatório Visual Anual")) tipo = "anual";
-    if (procurar(sheet, "Pesquisa de Satisfação")) tipo = "satisfacao";
-    if (procurar(sheet, "Individual")) tipo = "individual";
-
-    const total = procurar(sheet, "Total") || procurar(sheet, "Total de Tickets");
-    const resolvidos = procurar(sheet, "Resolvidos");
-    const pendentes = procurar(sheet, "Pendentes");
-    const cancelados = procurar(sheet, "Cancelados");
-    const satisfacao = procurar(sheet, "Satisfação") || procurar(sheet, "Score");
+    const row = data[0];
 
     await pool.query(`
       INSERT INTO indicadores
-      (tipo, total, resolvidos, pendentes, cancelados, satisfacao)
-      VALUES ($1,$2,$3,$4,$5,$6)
-    `, [tipo, total, resolvidos, pendentes, cancelados, satisfacao]);
+      (total, resolvidos, pendentes, cancelados, satisfacao, mes, ano)
+      VALUES ($1,$2,$3,$4,$5,$6,$7)
+    `, [
+      row.total,
+      row.resolvidos,
+      row.pendentes,
+      row.cancelados,
+      row.satisfacao,
+      row.mes,
+      row.ano
+    ]);
 
     res.json({ ok: true });
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ erro: "Erro ao processar relatório" });
+    res.status(500).json({ erro: "Erro ao processar Excel" });
   }
 });
 
 app.get("/dados", async (req, res) => {
+  const { mes, ano } = req.query;
+
   const result = await pool.query(`
     SELECT * FROM indicadores
+    WHERE mes = $1 AND ano = $2
     ORDER BY data DESC
     LIMIT 1
-  `);
+  `, [mes, ano]);
 
   res.json(result.rows[0] || null);
 });
 
-app.get("/historico", async (req, res) => {
+app.get("/mensal", async (req, res) => {
   const result = await pool.query(`
-    SELECT data, total
+    SELECT mes, SUM(resolvidos) resolvidos
     FROM indicadores
-    ORDER BY data ASC
+    GROUP BY mes
+    ORDER BY mes
   `);
 
   res.json(result.rows);
 });
-
-/* PDF Executivo */
 
 app.get("/pdf", async (req, res) => {
   const result = await pool.query(`
@@ -110,6 +91,7 @@ app.get("/pdf", async (req, res) => {
   `);
 
   const d = result.rows[0];
+
   if (!d) return res.status(400).send("Sem dados");
 
   const doc = new PDFDocument();
@@ -119,18 +101,16 @@ app.get("/pdf", async (req, res) => {
 
   doc.fontSize(18).text("Relatório Executivo IE");
   doc.moveDown();
-  doc.text(`Tipo: ${d.tipo}`);
   doc.text(`Total: ${d.total}`);
   doc.text(`Resolvidos: ${d.resolvidos}`);
   doc.text(`Pendentes: ${d.pendentes}`);
   doc.text(`Cancelados: ${d.cancelados}`);
   doc.text(`Satisfação: ${d.satisfacao}`);
+  doc.text(`Mês/Ano: ${d.mes}/${d.ano}`);
 
   doc.end();
 });
 
 const PORT = process.env.PORT || 10000;
 
-app.listen(PORT, () => {
-  console.log("BI Inteligente Ativo 🚀🔥");
-});
+app.listen(PORT, () => console.log("BI Executivo rodando 🚀"));
