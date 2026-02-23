@@ -1,4 +1,14 @@
 let grafico;
+let abaAtual = "geral";
+
+function trocarAba(aba) {
+    abaAtual = aba;
+
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    event.target.classList.add("active");
+
+    carregar();
+}
 
 async function carregar() {
     const res = await fetch("/dados");
@@ -6,38 +16,31 @@ async function carregar() {
 
     if (!d) {
         document.getElementById("conteudo").innerHTML = `
-            <div class="empty-state">
-                Nenhum relatório inserido.<br><br>
-                Envie um relatório para visualizar os indicadores.
-            </div>
+            <div class="card">Nenhum relatório inserido</div>
         `;
+        if (grafico) grafico.destroy();
         return;
     }
 
-    document.getElementById("conteudo").innerHTML = `
-        <div class="cards">
-            <div class="card"><span>Total Tickets</span><strong>${d.total_tickets}</strong></div>
-            <div class="card"><span>Resolvidos</span><strong>${d.resolvidos}</strong></div>
-            <div class="card"><span>Pendentes</span><strong>${d.pendentes}</strong></div>
-            <div class="card"><span>Cancelados</span><strong>${d.cancelados}</strong></div>
-            <div class="card"><span>Satisfação</span><strong>${d.satisfacao}</strong></div>
-        </div>
-    `;
+    if (abaAtual === "geral") {
+        document.getElementById("conteudo").innerHTML = `
+            <div class="cards">
+                <div class="card"><span>Total</span><strong>${d.total || "-"}</strong></div>
+                <div class="card"><span>Resolvidos</span><strong>${d.resolvidos || "-"}</strong></div>
+                <div class="card"><span>Satisfação</span><strong>${d.satisfacao || "-"}</strong></div>
+            </div>
+        `;
 
-    carregarGrafico();
+        carregarGraficoLinha();
+    }
 }
 
-async function carregarGrafico() {
+async function carregarGraficoLinha() {
     const res = await fetch("/historico");
     const dados = await res.json();
 
-    const labels = dados.map(d => 
-        new Date(d.data).toLocaleDateString()
-    );
-
-    const resolvidos = dados.map(d => d.resolvidos);
-    const pendentes = dados.map(d => d.pendentes);
-    const cancelados = dados.map(d => d.cancelados);
+    const labels = dados.map(d => new Date(d.data).toLocaleDateString());
+    const totais = dados.map(d => d.total);
 
     if (grafico) grafico.destroy();
 
@@ -45,11 +48,10 @@ async function carregarGrafico() {
         type: "line",
         data: {
             labels,
-            datasets: [
-                { label: "Resolvidos", data: resolvidos },
-                { label: "Pendentes", data: pendentes },
-                { label: "Cancelados", data: cancelados }
-            ]
+            datasets:[{
+                label:"Evolução",
+                data: totais
+            }]
         }
     });
 }
