@@ -16,82 +16,120 @@ const pool = new Pool({
 app.use(express.static("public"));
 app.use(express.json());
 
-/* ================= DB INIT PROFISSIONAL ================= */
+/* ================= BANCO BI DEFINITIVO ================= */
 
 async function initDB() {
   try {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS indicadores (
         id SERIAL PRIMARY KEY,
+
+        mes INT,
+        ano INT,
+
         total INT,
         resolvidos INT,
         pendentes INT,
         cancelados INT,
+
         satisfacao FLOAT,
-        mes INT,
-        ano INT,
-        data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE (mes, ano)
+
+        monique_total INT,
+        monique_positiva INT,
+        monique_negativa INT,
+
+        lorenna_total INT,
+        lorenna_positiva INT,
+        lorenna_negativa INT,
+
+        data TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
 
     console.log("✅ Banco pronto");
   } catch (err) {
-    console.error("❌ Erro ao iniciar DB:", err);
+    console.error("❌ Erro DB:", err);
   }
 }
 
 initDB();
 
-/* ================= NORMALIZADOR EXCEL ================= */
-
-function normalizarRow(row) {
-  return {
-    total: row.total ?? row.Total ?? 0,
-    resolvidos: row.resolvidos ?? row.Resolvidos ?? 0,
-    pendentes: row.pendentes ?? row.Pendentes ?? 0,
-    cancelados: row.cancelados ?? row.Cancelados ?? 0,
-    satisfacao: row.satisfacao ?? row.Satisfação ?? row.satisfacao_media ?? 0,
-    mes: row.mes ?? row.Mês ?? row.mês,
-    ano: row.ano ?? row.Ano
-  };
-}
-
-/* ================= UPLOAD ================= */
+/* ================= UPLOAD INTELIGENTE ================= */
 
 app.post("/upload", upload.single("file"), async (req, res) => {
   try {
     const workbook = XLSX.readFile(req.file.path);
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const data = XLSX.utils.sheet_to_json(sheet);
+    const rows = XLSX.utils.sheet_to_json(sheet);
 
-    const rawRow = data[0];
-    const row = normalizarRow(rawRow);
+    const row = rows[0];
+    const colunas = Object.keys(row);
 
-    if (!row.mes || !row.ano) {
-      return res.status(400).json({ erro: "Mês/Ano não encontrado no Excel" });
+    let dados = {
+      mes: row["Mês"],
+      ano: new Date().getFullYear()
+    };
+
+    /* 📊 RELATÓRIO OPERACIONAL */
+    if (colunas.includes("Resolvido")) {
+
+      dados.total =
+        (row["Aberto"] || 0) +
+        (row["Aguardando IE"] || 0) +
+        (row["Cancelado"] || 0) +
+        (row["Em espera"] || 0) +
+        (row["Novo"] || 0) +
+        (row["Pendente"] || 0) +
+        (row["Resolvido"] || 0);
+
+      dados.resolvidos = row["Resolvido"] || 0;
+      dados.pendentes = row["Pendente"] || 0;
+      dados.cancelados = row["Cancelado"] || 0;
+    }
+
+    /* 😊 SATISFAÇÃO GERAL */
+    if (colunas.includes("Score Satisfação (%)")) {
+      dados.satisfacao = row["Score Satisfação (%)"];
+    }
+
+    /* 👩‍💼 SATISFAÇÃO INDIVIDUAL */
+    if (colunas.includes("Monique - Total")) {
+      dados.monique_total = row["Monique - Total"];
+      dados.monique_positiva = row["Monique - Positiva"];
+      dados.monique_negativa = row["Monique - Negativa"];
+
+      dados.lorenna_total = row["Lorenna - Total"];
+      dados.lorenna_positiva = row["Lorenna - Positiva"];
+      dados.lorenna_negativa = row["Lorenna - Negativa"];
     }
 
     await pool.query(`
-      INSERT INTO indicadores
-      (total, resolvidos, pendentes, cancelados, satisfacao, mes, ano)
-      VALUES ($1,$2,$3,$4,$5,$6,$7)
-
-      ON CONFLICT (mes, ano)
-      DO UPDATE SET
-        total = COALESCE(EXCLUDED.total, indicadores.total),
-        resolvidos = COALESCE(EXCLUDED.resolvidos, indicadores.resolvidos),
-        pendentes = COALESCE(EXCLUDED.pendentes, indicadores.pendentes),
-        cancelados = COALESCE(EXCLUDED.cancelados, indicadores.cancelados),
-        satisfacao = COALESCE(EXCLUDED.satisfacao, indicadores.satisfacao)
+      INSERT INTO indicadores (
+        mes, ano,
+        total, resolvidos, pendentes, cancelados,
+        satisfacao,
+        monique_total, monique_positiva, monique_negativa,
+        lorenna_total, lorenna_positiva, lorenna_negativa
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
     `, [
-      row.total,
-      row.resolvidos,
-      row.pendentes,
-      row.cancelados,
-      row.satisfacao,
-      row.mes,
-      row.ano
+      dados.mes,
+      dados.ano,
+
+      dados.total || null,
+      dados.resolvidos || null,
+      dados.pendentes || null,
+      dados.cancelados || null,
+
+      dados.satisfacao || null,
+
+      dados.monique_total || null,
+      dados.monique_positiva || null,
+      dados.monique_negativa || null,
+
+      dados.lorenna_total || null,
+      dados.lorenna_positiva || null,
+      dados.lorenna_negativa || null
     ]);
 
     fs.unlinkSync(req.file.path);
@@ -104,15 +142,29 @@ app.post("/upload", upload.single("file"), async (req, res) => {
   }
 });
 
-/* ================= DADOS FILTRADOS ================= */
+/* ================= DADOS CONSOLIDADOS ================= */
 
 app.get("/dados", async (req, res) => {
   const { mes, ano } = req.query;
 
   const result = await pool.query(`
-    SELECT * FROM indicadores
+    SELECT
+      MAX(total) total,
+      MAX(resolvidos) resolvidos,
+      MAX(pendentes) pendentes,
+      MAX(cancelados) cancelados,
+      MAX(satisfacao) satisfacao,
+
+      MAX(monique_total) monique_total,
+      MAX(monique_positiva) monique_positiva,
+      MAX(monique_negativa) monique_negativa,
+
+      MAX(lorenna_total) lorenna_total,
+      MAX(lorenna_positiva) lorenna_positiva,
+      MAX(lorenna_negativa) lorenna_negativa
+
+    FROM indicadores
     WHERE mes = $1 AND ano = $2
-    LIMIT 1
   `, [mes, ano]);
 
   res.json(result.rows[0] || null);
@@ -156,7 +208,6 @@ app.get("/pdf", async (req, res) => {
   doc.text(`Pendentes: ${d.pendentes}`);
   doc.text(`Cancelados: ${d.cancelados}`);
   doc.text(`Satisfação: ${d.satisfacao}`);
-  doc.text(`Mês/Ano: ${d.mes}/${d.ano}`);
 
   doc.end();
 });
