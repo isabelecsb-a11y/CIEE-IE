@@ -1,3 +1,4 @@
+
 let grafico;
 let abaAtual = "geral";
 
@@ -16,7 +17,9 @@ async function carregar() {
 
     if (!d) {
         document.getElementById("conteudo").innerHTML = `
-            <div class="card">Nenhum relatório inserido</div>
+            <div class="empty-state">
+                Nenhum relatório inserido
+            </div>
         `;
         if (grafico) grafico.destroy();
         return;
@@ -27,15 +30,17 @@ async function carregar() {
             <div class="cards">
                 <div class="card"><span>Total</span><strong>${d.total || "-"}</strong></div>
                 <div class="card"><span>Resolvidos</span><strong>${d.resolvidos || "-"}</strong></div>
+                <div class="card"><span>Pendentes</span><strong>${d.pendentes || "-"}</strong></div>
+                <div class="card"><span>Cancelados</span><strong>${d.cancelados || "-"}</strong></div>
                 <div class="card"><span>Satisfação</span><strong>${d.satisfacao || "-"}</strong></div>
             </div>
         `;
 
-        carregarGraficoLinha();
+        carregarGrafico();
     }
 }
 
-async function carregarGraficoLinha() {
+async function carregarGrafico() {
     const res = await fetch("/historico");
     const dados = await res.json();
 
@@ -48,8 +53,8 @@ async function carregarGraficoLinha() {
         type: "line",
         data: {
             labels,
-            datasets:[{
-                label:"Evolução",
+            datasets: [{
+                label: "Evolução",
                 data: totais
             }]
         }
@@ -64,8 +69,8 @@ async function upload() {
     fd.append("file", file);
 
     await fetch("/upload", {
-        method:"POST",
-        body:fd
+        method: "POST",
+        body: fd
     });
 
     location.reload();
